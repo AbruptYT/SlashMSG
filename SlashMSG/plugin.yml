@@ -1,0 +1,5 @@
+name: SlashMSG
+version: 1.0
+author: AbruptYT
+api: 3.0.0
+main: AbruptYT\SlashMSG\SlashMSG
