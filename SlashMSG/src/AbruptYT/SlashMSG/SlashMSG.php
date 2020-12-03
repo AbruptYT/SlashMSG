@@ -18,7 +18,7 @@ use pocketmine\command\Command;
  */
 class SlashMSG extends PluginBase {
 
-    public static $instance, $lastMSG = [];
+    public static $instance, $lastMSG = [], $msgToggle = [];
     const PREFIX = "§l§9MSG §r§8» §r";
 
     public function onEnable() {
@@ -32,7 +32,7 @@ class SlashMSG extends PluginBase {
         /**
          * @var $cmds string[]
          */
-        $cmds = ["msg", "tell", "r", "reply"];
+        $cmds = ["msg", "tell", "r", "reply", "msgtoggle"];
 
         foreach ($cmds as $cmd) {
             /**
@@ -44,7 +44,7 @@ class SlashMSG extends PluginBase {
             }
         }
 
-        $cmdmap->registerAll("SlashMSG", [new MSGCommand("msg", $this), new ReplyCommand("reply", $this)]);
+        $cmdmap->registerAll("SlashMSG", [new MSGCommand("msg", $this), new ReplyCommand("reply", $this), new MSGToggleCommand("msgtoggle", $this)]);
     }
 
     public function onDisable() {
@@ -94,6 +94,11 @@ class MSGCommand extends PluginCommand {
 
         if(!isset($args[1])) {
             $sender->sendMessage(SlashMSG::PREFIX . "§cBitte gib eine Nachricht ein!");
+            return false;
+        }
+
+        if(isset(SlashMSG::$msgToggle[$player->getName()])) {
+            $sender->sendMessage(SlashMSG::PREFIX . "§cDu kannst diesem Spieler keine Privatnachrichten senden!");
             return false;
         }
 
@@ -164,6 +169,12 @@ class ReplyCommand extends PluginCommand {
 
         $pName = $player->getName();
 
+        if(isset(SlashMSG::$msgToggle[$player->getName()])) {
+            $sender->sendMessage(SlashMSG::PREFIX . "§cDu kannst diesem Spieler keine Privatnachrichten senden!");
+            return false;
+        }
+
+
         /**
          * @var $message string
          */
@@ -171,6 +182,36 @@ class ReplyCommand extends PluginCommand {
 
         $player->sendMessage("§7[§e". $sName ." §8-> §cdir§7] §r" . $message);
         $sender->sendMessage("§7[§cDu §8-> §e" . $pName . "§7] §r" . $message);
+
+    }
+
+}
+
+/**
+ * Diese Klasse repräsentiert den /msgtoggle Command.
+ * @author AbruptYT
+ * @version 1.0
+ */
+class MSGToggleCommand extends PluginCommand {
+
+    public function __construct(string $name, Plugin $owner) {
+        parent::__construct($name, $owner);
+        $this->setDescription("Deaktiviere deine Privatnachrichten.");
+    }
+
+    public function execute(CommandSender $sender, string $commandLabel, array $args) {
+
+        if(!$sender instanceof Player) return false;
+
+        $sName = $sender->getName();
+
+        if(isset(SlashMSG::$msgToggle[$sName])) {
+            unset(SlashMSG::$msgToggle[$sName]);
+            $sender->sendMessage(SlashMSG::PREFIX . "§aDu hast deine MSG's aktiviert!");
+        } elseif (!isset(SlashMSG::$msgToggle[$sName])) {
+            SlashMSG::$msgToggle[$sName] = true;
+            $sender->sendMessage(SlashMSG::PREFIX . "§cDu hast deine MSG's deaktiviert!");
+        }
 
     }
 
@@ -185,8 +226,8 @@ class EventHandler implements Listener {
 
     public function onQuit(PlayerQuitEvent $event) {
         $pName = $event->getPlayer()->getName();
-        $lastMSG = SlashMSG::$lastMSG;
-        if(isset($lastMSG[$pName])) unset(SlashMSG::$lastMSG[$pName]);
+        if(isset(SlashMSG::$lastMSG[$pName])) unset(SlashMSG::$lastMSG[$pName]);
+        if(isset(SlashMSG::$msgToggle[$pName])) unset(SlashMSG::$msgToggle[$pName]);
     }
 
 }
