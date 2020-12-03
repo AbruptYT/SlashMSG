@@ -1,2 +1,2 @@
-## SlashMSG
-# Pocketmine Plugin
+# SlashMSG
+## Pocketmine Plugin
