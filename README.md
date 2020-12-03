@@ -10,7 +10,7 @@ SlashMSG ist ein Plugin für <a href="https://github.com/pmmp/PocketMine-MP">Poc
 
 ## Commands
 * /message `<name>` `<message>` | Alias: /msg
-* /reply `<message>` | Alias: /msg
+* /reply `<message>` | Alias: /r
 
 ## Setup
 Plugin downloaden, entpacken und in den plugin Order verschieben.
